@@ -6,7 +6,6 @@ class VanillaPolicyGradient:
     def __init__(self, actor, environment, plotter=None, render=False):
         self.actor = actor
         self.policy_optimiser = torch.optim.Adam(actor.get_policy().parameters(), lr=0.001)
-        self.value_optimiser = torch.optim.Adam(actor.value_net.parameters(), lr=0.001)
         self.environment = environment
         self.plotter = plotter
         self.render = render
@@ -57,10 +56,7 @@ class VanillaPolicyGradient:
         policy_loss.backward(retain_graph=True)
         self.policy_optimiser.step()
 
-        self.value_optimiser.zero_grad()
-        value_loss = torch.nn.MSELoss()(rewards_to_go, value_estimates.squeeze(-1))
-        value_loss.backward()
-        self.value_optimiser.step()
+        self.actor.optimise_critic(rewards_to_go, value_estimates)
 
     def compute_loss(self, observations, actions, weights):
         log_probabilities = self.actor.get_policy().get_log_probs(observations, actions)
