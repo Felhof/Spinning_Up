@@ -7,12 +7,13 @@ from environment_wrapper import EnvironmentWrapper
 from vanilla_policy_gradient import VanillaPolicyGradient
 from PPO import PPO
 
+
 def main():
-    env = EnvironmentWrapper("Pendulum-v0")
+    env = EnvironmentWrapper("CartPole-v1")
     actor = Actor(env)
     result_plotter = ResultPlotter(unit="Reward")
     ppo = PPO(actor=actor, environment=env, plotter=result_plotter, render=False)
-    ppo.proximal_policy_optimisation(epochs=300, episodes=15, max_steps_per_episode=150)
+    ppo.training(epochs=100, episodes=20, max_steps_per_episode=300)
 
     # plot learning curve
     result_plotter.plot_results()
