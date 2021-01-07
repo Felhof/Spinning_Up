@@ -5,14 +5,15 @@ import torch
 from Actor import Actor
 from environment_wrapper import EnvironmentWrapper
 from vanilla_policy_gradient import VanillaPolicyGradient
+from PPO import PPO
 
 
 def main():
     env = EnvironmentWrapper("CartPole-v1")
     actor = Actor(env)
     result_plotter = ResultPlotter(unit="Reward")
-    vpg = VanillaPolicyGradient(actor=actor, environment=env, plotter=result_plotter, render=False)
-    vpg.vanilla_policy_gradient(epochs=500, episodes=30, max_steps_per_episode=300)
+    ppo = PPO(actor=actor, environment=env, plotter=result_plotter, render=False)
+    ppo.training(epochs=100, episodes=20, max_steps_per_episode=300)
 
     # plot learning curve
     result_plotter.plot_results()

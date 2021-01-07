@@ -82,9 +82,10 @@ class Actor:
         elif isinstance(environment.action_space, gym.spaces.Discrete):
             self.policy = CategoricalPolicy(environment.action_space.n, observation_dim, hidden_sizes, activations)
 
-        vale_net_sizes = [observation_dim, 128, 1]
-        vale_net_activations = [torch.nn.ReLU, torch.nn.Identity]
-        self.value_net = mlp(vale_net_sizes, vale_net_activations)
+        critic_sizes = [observation_dim, 128, 1]
+        critic_activations = [torch.nn.ReLU, torch.nn.Identity]
+        self.critic = mlp(critic_sizes, critic_activations)
+        self.critic_optimiser = torch.optim.Adam(self.critic.parameters(), lr=0.001)
 
     def get_observation_dim(self, observation_space):
         if isinstance(observation_space, gym.spaces.Box):
@@ -100,4 +101,10 @@ class Actor:
         return self.policy
 
     def estimate_value(self, obs):
-        return self.value_net.forward(obs)
+        return self.critic.forward(obs)
+
+    def optimise_critic(self, rewards_to_go, value_estimates):
+        self.critic_optimiser.zero_grad()
+        value_loss = torch.nn.MSELoss()(rewards_to_go, value_estimates.squeeze(-1))
+        value_loss.backward()
+        self.critic_optimiser.step()
